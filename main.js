@@ -209,6 +209,10 @@ ipcMain.handle('set-setting', (event, key, value) => {
     }
 });
 
+ipcMain.handle('get-app-version', () => {
+    return app.getVersion();
+});
+
 // Window Controls
 ipcMain.on('window-minimize', () => {
     mainWindow.minimize();

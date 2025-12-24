@@ -8,6 +8,7 @@ import TitleBar from './TitleBar';
 export default function Layout() {
   const { t } = useTranslation();
   const [activeCount, setActiveCount] = useState(0);
+  const [appVersion, setAppVersion] = useState('');
 
   useEffect(() => {
     const updateCount = async () => {
@@ -16,6 +17,8 @@ export default function Layout() {
     };
 
     updateCount();
+    window.api.getAppVersion().then(ver => setAppVersion(ver));
+
     const removeListener = window.api.onServerUpdate(updateCount);
     return () => removeListener && removeListener();
   }, []);
@@ -67,7 +70,7 @@ export default function Layout() {
           </nav>
 
           <div className="p-4 border-t border-gray-200 dark:border-gray-700 text-xs text-center text-gray-400">
-            v1.0.0
+            v{appVersion}
           </div>
         </div>
 

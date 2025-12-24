@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 export default function About() {
   const { t } = useTranslation();
+  const [appVersion, setAppVersion] = React.useState('');
+
+  React.useEffect(() => {
+    window.api.getAppVersion().then(ver => setAppVersion(ver));
+  }, []);
 
   return (
     <div className="p-6">
@@ -17,7 +22,7 @@ export default function About() {
         <div className="space-y-2 text-sm">
           <div className="flex">
             <span className="w-24 font-medium text-gray-500">{t('version')}:</span>
-            <span>0.1.0</span>
+            <span>{appVersion}</span>
           </div>
           <div className="flex">
             <span className="w-24 font-medium text-gray-500">{t('author')}:</span>

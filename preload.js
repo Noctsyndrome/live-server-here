@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('api', {
     setLanguage: (lng) => ipcRenderer.invoke('set-language', lng),
     getSettings: () => ipcRenderer.invoke('get-settings'),
     setSetting: (key, value) => ipcRenderer.invoke('set-setting', key, value),
+    getAppVersion: () => ipcRenderer.invoke('get-app-version'),
     onServerUpdate: (callback) => {
         const listener = (event, data) => callback(data);
         ipcRenderer.on('server-update', listener);

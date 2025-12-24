@@ -5,6 +5,8 @@ Live Server Here is a modern desktop application designed to simplify the proces
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Version](https://img.shields.io/badge/version-0.1.0-green.svg)
 
+<img width="2876" height="1422" alt="Live Server Here" src="https://github.com/user-attachments/assets/9a357290-e506-429c-961f-c76b3df550e4" />
+
 ## Features
 
 - **Context Menu Integration**: Right-click any folder in Windows Explorer and select "Live Server Here" to start serving immediately.

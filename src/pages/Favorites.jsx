@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Star } from 'lucide-react';
 import CompactServerItem from '../components/CompactServerItem';
 
 export default function Favorites() {
@@ -42,15 +43,19 @@ export default function Favorites() {
       <h2 className="text-2xl font-bold mb-8 text-gray-900 dark:text-gray-100">{t('favorites')}</h2>
 
       {favorites.length === 0 ? (
-        <div className="text-center py-10 text-gray-500">
-          {t('noFavorites')}
+        <div className="flex flex-col items-center justify-center py-16 bg-white/50 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700/50 text-gray-400 backdrop-blur-sm">
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+            <Star size={28} className="opacity-50" />
+          </div>
+          <p className="text-base font-medium mb-1">{t('noFavorites')}</p>
+          <p className="text-sm text-gray-400">{t('emptyFavoritesHint')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {favorites.map((item) => (
-            <CompactServerItem 
-              key={item.root} 
-              server={{...item}}
+            <CompactServerItem
+              key={item.root}
+              server={{ ...item }}
               onStart={handleStart}
               onToggleFavorite={handleToggleFavorite}
               isFavorite={true}

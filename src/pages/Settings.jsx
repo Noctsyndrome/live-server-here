@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 
 export default function Settings() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [theme, setTheme] = useState('light');
   const [defaultPort, setDefaultPort] = useState(8080);
 
@@ -12,7 +15,7 @@ export default function Settings() {
       setDefaultPort(settings.defaultPort || 8080);
     });
   }, []);
-  
+
   const changeLanguage = (e) => {
     const lng = e.target.value;
     i18n.changeLanguage(lng);
@@ -39,7 +42,7 @@ export default function Settings() {
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">{t('settings')}</h2>
-      
+
       <div className="space-y-4">
         {/* Language */}
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between">
@@ -67,11 +70,10 @@ export default function Settings() {
                 const e = { target: { value: 'light' } };
                 changeTheme(e);
               }}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                theme === 'light'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${theme === 'light'
+                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
             >
               {t('light')}
             </button>
@@ -80,11 +82,10 @@ export default function Settings() {
                 const e = { target: { value: 'dark' } };
                 changeTheme(e);
               }}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                theme === 'dark'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${theme === 'dark'
+                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
             >
               {t('dark')}
             </button>
@@ -102,6 +103,17 @@ export default function Settings() {
             onChange={changeDefaultPort}
             className="w-48 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white text-sm"
           />
+        </div>
+
+        {/* View Logs */}
+        <div
+          onClick={() => navigate('/logs')}
+          className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+        >
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+            {t('viewLogs')}
+          </label>
+          <ChevronRight size={20} className="text-gray-400" />
         </div>
       </div>
     </div>

@@ -6,7 +6,9 @@ import Favorites from './pages/Favorites';
 import History from './pages/History';
 import Settings from './pages/Settings';
 import About from './pages/About';
+import Logs from './pages/Logs';
 import { useTranslation } from 'react-i18next';
+import { ToastProvider } from './components/Toast';
 
 function App() {
   const { i18n } = useTranslation();
@@ -28,17 +30,20 @@ function App() {
   }, [i18n]);
 
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="history" element={<History />} />
-          <Route path="favorites" element={<Favorites />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="about" element={<About />} />
-        </Route>
-      </Routes>
-    </HashRouter>
+    <ToastProvider>
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="history" element={<History />} />
+            <Route path="favorites" element={<Favorites />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="logs" element={<Logs />} />
+            <Route path="about" element={<About />} />
+          </Route>
+        </Routes>
+      </HashRouter>
+    </ToastProvider>
   );
 }
 

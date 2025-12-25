@@ -1,11 +1,13 @@
 const { app, BrowserWindow, ipcMain, dialog, Notification } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 // Set App User Model ID for Windows Taskbar Icon
 app.setAppUserModelId('com.liveserverhere.app');
 
 const serverManager = require('./server-manager');
 const trayManager = require('./tray-manager');
+const logger = require('./logger');
 const Store = require('electron-store');
 
 const store = new Store();
@@ -38,17 +40,17 @@ function createWindow() {
         }
         return false;
     });
-    
+
     // If no args (just opened), show window
     // Check if we have args that look like a path
     // argv[1] is usually the path in dev, or executable in prod... need to be careful.
     // In prod: argv[1] might be the argument.
     // In dev: argv[2] might be the argument.
-    
+
     // We will handle args parsing in a separate function.
-    
+
     trayManager.init(mainWindow);
-    
+
     // Set initial language for tray
     const lng = store.get('language', 'zh');
     trayManager.setLanguage(lng);
@@ -63,7 +65,7 @@ if (!gotTheLock) {
         // Someone tried to run a second instance, we should focus our window.
         // And if there are args, handle them.
         handleCommandLine(commandLine);
-        
+
         // Optionally show window, or just notify user via tray balloon?
         // If we started a server, maybe we don't need to show window immediately, just notification.
         // But for now let's show window to confirm.
@@ -76,7 +78,7 @@ if (!gotTheLock) {
     app.whenReady().then(() => {
         createWindow();
         handleCommandLine(process.argv);
-        
+
         // Restore history?
         // Maybe implemented later.
     });
@@ -86,18 +88,18 @@ function handleCommandLine(argv) {
     // Determine if there is a path argument.
     // In dev: electron . path
     // In prod: app.exe path
-    
+
     // Simple heuristic: find first argument that is a valid directory.
     const fs = require('fs');
-    
+
     // Skip the first arg (executable)
     // In dev, we might have more args.
-    
+
     const possiblePaths = argv.slice(1);
-    
+
     for (const p of possiblePaths) {
         if (p === '.' || p.startsWith('--')) continue; // Skip flags or current dir if passed by mistake? actually . is valid.
-        
+
         try {
             if (fs.existsSync(p) && fs.lstatSync(p).isDirectory()) {
                 // Found a directory! Start server.
@@ -117,18 +119,72 @@ function handleCommandLine(argv) {
     }
 }
 
-const fs = require('fs');
+// Helper function to classify errors
+function classifyError(error, rootPath) {
+    const errorMessage = error.message || error.toString();
+
+    // Check if path exists
+    if (!fs.existsSync(rootPath)) {
+        return {
+            type: 'invalidPath',
+            message: 'errorInvalidPath',
+            suggestion: 'Please check the folder path and try again.'
+        };
+    }
+
+    // Check for permission errors
+    if (errorMessage.includes('EACCES') || errorMessage.includes('EPERM')) {
+        return {
+            type: 'permissionDenied',
+            message: 'errorPermissionDenied',
+            suggestion: 'Try running as administrator or changing folder permissions.'
+        };
+    }
+
+    // Check for port conflicts
+    if (errorMessage.includes('EADDRINUSE') || errorMessage.includes('port')) {
+        return {
+            type: 'portConflict',
+            message: 'errorPortConflict',
+            suggestion: 'All ports in range are in use. Try closing some applications.'
+        };
+    }
+
+    // Unknown error
+    return {
+        type: 'unknown',
+        message: 'errorUnknown',
+        suggestion: errorMessage
+    };
+}
 
 // IPC Handlers
 ipcMain.handle('start-server', async (event, rootPath) => {
     const defaultPort = store.get('defaultPort', 8080);
-    const info = await serverManager.startServer(rootPath, defaultPort);
-    addToHistory(rootPath);
-    return info;
+
+    try {
+        const info = await serverManager.startServer(rootPath, defaultPort);
+        addToHistory(rootPath);
+        logger.info('Server started', { root: rootPath, port: info.port });
+
+        // Check if port changed
+        if (info.port !== defaultPort) {
+            info.portChanged = true;
+            info.requestedPort = defaultPort;
+        }
+
+        return { success: true, ...info };
+    } catch (error) {
+        const errorInfo = classifyError(error, rootPath);
+        logger.error('Failed to start server', { root: rootPath, error: errorInfo });
+        return { success: false, error: errorInfo };
+    }
 });
 
 ipcMain.handle('stop-server', async (event, rootPath) => {
-    return serverManager.stopServer(rootPath);
+    serverManager.stopServer(rootPath);
+    logger.info('Server stopped', { root: rootPath });
+    return { success: true };
 });
 
 ipcMain.handle('get-servers', async () => {
@@ -213,6 +269,19 @@ ipcMain.handle('get-app-version', () => {
     return app.getVersion();
 });
 
+ipcMain.handle('get-logs', () => {
+    return logger.getLogs(50);
+});
+
+ipcMain.handle('clear-logs', () => {
+    return logger.clearLogs();
+});
+
+ipcMain.handle('open-external', async (event, url) => {
+    const { shell } = require('electron');
+    return shell.openExternal(url);
+});
+
 // Window Controls
 ipcMain.on('window-minimize', () => {
     mainWindow.minimize();
@@ -239,7 +308,7 @@ function addToHistory(path) {
     // Limit to 20
     if (history.length > 20) history.pop();
     store.set('history', history);
-    
+
     // Ensure meta exists
     const key = `meta.${escapePath(path)}`;
     if (!store.has(key)) {

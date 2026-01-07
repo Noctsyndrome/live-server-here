@@ -1,6 +1,6 @@
 {
   "name": "live-server-here",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Launch Live Server from Windows Context Menu",
   "main": "main.js",
   "scripts": {
@@ -50,6 +50,7 @@
       "server-manager.js",
       "server-runner.js",
       "tray-manager.js",
+      "logger.js",
       "package.json"
     ],
     "directories": {

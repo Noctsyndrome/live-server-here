@@ -6,6 +6,7 @@
   "scripts": {
     "start": "electron .",
     "build-ui": "vite build",
+    "verify:entrypoints": "powershell -ExecutionPolicy Bypass -File ./scripts/verify-entrypoints.ps1",
     "pack": "electron-builder --dir",
     "dist": "electron-builder"
   },
